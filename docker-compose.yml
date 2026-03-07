@@ -1,0 +1,11 @@
+version: '3.8'
+
+services:
+  simulador-ia:
+    build: .
+    container_name: simulador-ia
+    ports:
+      - "8083:80"
+    environment:
+      - OPENAI_API_KEY=${OPENAI_API_KEY:-}
+    restart: unless-stopped

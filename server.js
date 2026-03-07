@@ -9,9 +9,6 @@ const PORT = process.env.PORT || 80;
 app.use(cors());
 app.use(express.json());
 
-// Serve static files from the current directory
-app.use(express.static(__dirname));
-
 // Endpoint to handle environment variables for frontend
 app.get('/env.js', (req, res) => {
   const envContent = `window.ENV = {
@@ -22,6 +19,9 @@ app.get('/env.js', (req, res) => {
   res.type('application/javascript');
   res.send(envContent);
 });
+
+// Serve static files from the current directory
+app.use(express.static(__dirname));
 
 // Endpoint to append usage logs
 app.post('/api/log', (req, res) => {

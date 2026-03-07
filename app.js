@@ -24,9 +24,82 @@ const prevBtn = document.getElementById("prev");
  * INIT
  *****************************************/
 document.addEventListener("DOMContentLoaded", () => {
+  initTheme();
   hideQuiz();
   initQuestionGenerator();
 });
+
+/*****************************************
+ * THEME MANAGEMENT
+ *****************************************/
+function initTheme() {
+  const savedTheme = localStorage.getItem('ai-theme') || 'dark';
+  applyTheme(savedTheme, false);
+
+  const dropdownBtn = document.getElementById('theme-dropdown-btn');
+  const dropdown = document.getElementById('theme-dropdown');
+  const themeOptions = document.querySelectorAll('.theme-option');
+
+  // Toggle dropdown
+  dropdownBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    dropdown.classList.toggle('open');
+  });
+
+  // Close dropdown when clicking outside
+  document.addEventListener('click', (e) => {
+    if (dropdown && !dropdown.contains(e.target)) {
+      dropdown.classList.remove('open');
+    }
+  });
+
+  // Handle theme selection
+  themeOptions.forEach(btn => {
+    btn.addEventListener('click', () => {
+      const theme = btn.getAttribute('data-theme-value');
+      applyTheme(theme, true);
+      dropdown.classList.remove('open');
+    });
+  });
+
+  // Listen for system theme changes
+  window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
+    if (localStorage.getItem('ai-theme') === 'system') {
+      applyTheme('system', false);
+    }
+  });
+}
+
+function applyTheme(theme, save = true) {
+  const root = document.documentElement;
+  
+  if (theme === 'system') {
+    root.removeAttribute('data-theme');
+    if (save) localStorage.setItem('ai-theme', 'system');
+  } else {
+    root.setAttribute('data-theme', theme);
+    if (save) localStorage.setItem('ai-theme', theme);
+  }
+
+  // Update active option state
+  document.querySelectorAll('.theme-option').forEach(btn => {
+    if (btn.getAttribute('data-theme-value') === theme) {
+      btn.classList.add('active');
+      
+      // Update the icon in the dropdown button
+      const svgClone = btn.querySelector('svg').cloneNode(true);
+      svgClone.classList.add('active-icon');
+      
+      const dropdownBtn = document.getElementById('theme-dropdown-btn');
+      const oldIcon = dropdownBtn.querySelector('.active-icon');
+      if (oldIcon && dropdownBtn) {
+        dropdownBtn.replaceChild(svgClone, oldIcon);
+      }
+    } else {
+      btn.classList.remove('active');
+    }
+  });
+}
 
 /*****************************************
  * VISIBILIDAD

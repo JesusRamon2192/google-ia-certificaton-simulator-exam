@@ -1,13 +1,15 @@
-FROM nginx:alpine
+FROM node:18-alpine
 
-# Copy static files to nginx html directory
-COPY . /usr/share/nginx/html/
+WORKDIR /app
 
-# Make entrypoint script executable
-RUN chmod +x /usr/share/nginx/html/entrypoint.sh
+# Copy all project files into the image
+COPY . /app/
+
+# Install dependencies defined in package.json
+RUN npm install
 
 # Expose port 80
 EXPOSE 80
 
-# Use our custom entrypoint script
-ENTRYPOINT ["/usr/share/nginx/html/entrypoint.sh", "nginx", "-g", "daemon off;"]
+# Start the node server
+CMD ["npm", "start"]

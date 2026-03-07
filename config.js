@@ -13,24 +13,35 @@ const getEnvVariable = (key, defaultValue = '') => {
 };
 
 const CONFIG = {
-  // OpenAI API Key - loaded from .env file
-  // IMPORTANT: For browser usage, you need to manually set this or use a backend server
-  OPENAI_API_KEY: getEnvVariable('OPENAI_API_KEY', ''),
+  // Configuración de las APIs - cargadas desde el archivo .env o env.js
+  APIS: [
+    {
+      name: 'OPENAI',
+      url: 'https://api.openai.com/v1/chat/completions',
+      key: getEnvVariable('OPENAI_API_KEY', ''),
+      model: 'gpt-4o-mini'
+    },
+    {
+      name: 'GROQ',
+      url: 'https://api.groq.com/openai/v1/chat/completions',
+      key: getEnvVariable('GROQ_API_KEY', ''),
+      model: 'llama-3.3-70b-versatile'
+    },
+    {
+      name: 'CEREBRAS',
+      url: 'https://api.cerebras.ai/v1/chat/completions',
+      key: getEnvVariable('CEREBRAS_API_KEY', ''),
+      model: 'llama3.1-8b'
+    }
+  ],
   
-  // API Endpoint
-  OPENAI_API_URL: 'https://api.openai.com/v1/chat/completions',
-  
-  // Model Configuration
-  MODEL: 'gpt-4o-mini', // Most economical model
-  // Alternative models: 'gpt-4o', 'gpt-4-turbo'
-  
-  // Generation Parameters
-  TEMPERATURE: 0.5, // Lower temperature for more consistent JSON formatting
-  MAX_TOKENS: 2000, // Increased to allow proper JSON completion
+  // Generation Parameters comunes
+  TEMPERATURE: 0.5,
+  MAX_TOKENS: 2000,
   
   // Question Generation Settings
   DEFAULT_QUESTION_COUNT: 1,
-  MAX_QUESTION_COUNT: 5, // Reduced to prevent overly long responses
+  MAX_QUESTION_COUNT: 5,
 };
 
 // Export configuration

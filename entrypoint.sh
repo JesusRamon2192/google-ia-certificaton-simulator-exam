@@ -1,14 +1,23 @@
 #!/bin/sh
 
-# Generate env.js with the provided OPENAI_API_KEY environment variable
-if [ -n "$OPENAI_API_KEY" ]; then
-  echo "window.ENV = { OPENAI_API_KEY: '$OPENAI_API_KEY' };" > /usr/share/nginx/html/env.js
-  echo "✅ env.js generated with provided API Key."
+if [ -n "$OPENAI_API_KEY" ] || [ -n "$GROQ_API_KEY" ] || [ -n "$CEREBRAS_API_KEY" ]; then
+  # Generate env.js with the provided environment variables
+  echo "window.ENV = {" > /usr/share/nginx/html/env.js
+  echo "  OPENAI_API_KEY: '${OPENAI_API_KEY:-}'," >> /usr/share/nginx/html/env.js
+  echo "  GROQ_API_KEY: '${GROQ_API_KEY:-}'," >> /usr/share/nginx/html/env.js
+  echo "  CEREBRAS_API_KEY: '${CEREBRAS_API_KEY:-}'" >> /usr/share/nginx/html/env.js
+  echo "};" >> /usr/share/nginx/html/env.js
+
+  echo "✅ env.js generated with provided API Keys."
 else
   # Check if env.js already exists (if it was copied during build)
   if [ ! -f /usr/share/nginx/html/env.js ]; then
-    echo "window.ENV = { OPENAI_API_KEY: '' };" > /usr/share/nginx/html/env.js
-    echo "⚠️ Warning: OPENAI_API_KEY not set. Empty env.js created."
+    echo "window.ENV = {" > /usr/share/nginx/html/env.js
+    echo "  OPENAI_API_KEY: ''," >> /usr/share/nginx/html/env.js
+    echo "  GROQ_API_KEY: ''," >> /usr/share/nginx/html/env.js
+    echo "  CEREBRAS_API_KEY: ''" >> /usr/share/nginx/html/env.js
+    echo "};" >> /usr/share/nginx/html/env.js
+    echo "⚠️ Warning: API Keys not set. Empty env.js created."
   fi
 fi
 

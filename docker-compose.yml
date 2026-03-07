@@ -8,4 +8,8 @@ services:
       - "8083:80"
     environment:
       - OPENAI_API_KEY=${OPENAI_API_KEY:-}
+      - GROQ_API_KEY=${GROQ_API_KEY:-}
+      - CEREBRAS_API_KEY=${CEREBRAS_API_KEY:-}
+    volumes:
+      - ./api-usage.log:/app/api-usage.log
     restart: unless-stopped

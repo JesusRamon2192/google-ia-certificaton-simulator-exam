@@ -4,9 +4,11 @@
 
 class QuestionGenerator {
   constructor() {
-    this.apiKey = CONFIG.OPENAI_API_KEY;
-    this.apiUrl = CONFIG.OPENAI_API_URL;
-    this.model = CONFIG.MODEL;
+    this.apis = CONFIG.APIS || [];
+    this.currentApiIndex = parseInt(localStorage.getItem('ai-current-api-index')) || 0;
+    if (this.currentApiIndex >= this.apis.length) {
+      this.currentApiIndex = 0;
+    }
     this.topics = [];
     this.BATCH_SIZE = 5;
   }
@@ -68,6 +70,17 @@ class QuestionGenerator {
       allQuestions.push(...unique);
     }
 
+    // Identificamos las preguntas agregando qué API se utilizó para esta corrida de batch
+    allQuestions.forEach(q => {
+      if(!q.apiUsed) {
+        q.apiUsed = this.apis[this.currentApiIndex].name;
+      }
+    });
+
+    // Moverse al siguiente índice API (Round Robin)
+    this.currentApiIndex = (this.currentApiIndex + 1) % this.apis.length;
+    localStorage.setItem('ai-current-api-index', this.currentApiIndex);
+
     return allQuestions.slice(0, total);
   }
 
@@ -119,11 +132,16 @@ FORMATO EXACTO:
   }
 
   /* ===============================
-   * OPENAI
+   * OPENAI COMPATIBLE API CALL
    * =============================== */
   async callOpenAI(prompt) {
+    const api = this.apis[this.currentApiIndex];
+    if (!api || !api.key) {
+      throw new Error(`API key no configurada para ${api?.name || 'la API actual'}.`);
+    }
+
     const body = {
-      model: this.model,
+      model: api.model,
       messages: [
         { role: "system", content: "Responde únicamente con JSON válido." },
         { role: "user", content: prompt }
@@ -132,18 +150,18 @@ FORMATO EXACTO:
       max_tokens: CONFIG.MAX_TOKENS
     };
 
-    const res = await fetch(this.apiUrl, {
+    const res = await fetch(api.url, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${this.apiKey}`
+        Authorization: `Bearer ${api.key}`
       },
       body: JSON.stringify(body)
     });
 
     if (!res.ok) {
       const err = await res.text();
-      console.error("❌ Error OpenAI:", err);
+      console.error(`❌ Error API (${api.name}):`, err);
       throw new Error("Error al generar preguntas");
     }
 

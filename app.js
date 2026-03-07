@@ -154,11 +154,16 @@ async function handleGenerateExam() {
 
     saveQuestionsToStorage();
 
+    const apiUsedName = questions[0]?.apiUsed || 'UNKNOWN';
+
     showQuiz();
     initSimulator();
 
+    // Trigger log download
+    downloadLogFile(apiUsedName);
+
     showStatus(
-      `✅ Examen generado (${questions.length} preguntas)`,
+      `✅ Examen generado (${questions.length} preguntas) usando ${apiUsedName}`,
       "success"
     );
   } catch (err) {
@@ -419,4 +424,22 @@ function showStatus(msg, type) {
   el.textContent = msg;
   el.className = `generation-status ${type}`;
   el.classList.remove("hidden");
+}
+
+async function downloadLogFile(apiName) {
+  try {
+    const response = await fetch('/api/log', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ apiName })
+    });
+    
+    if (!response.ok) {
+      console.warn('Advertencia: El backend no pudo guardar el log. ¿Estás en un entorno estático sin Node?');
+    }
+  } catch (error) {
+    console.error('Error de red al intentar guardar el log:', error);
+  }
 }

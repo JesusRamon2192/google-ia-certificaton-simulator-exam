@@ -1117,3 +1117,127 @@ button:hover::before {
   font-size: 1.1rem;
 }
 
+/* =========================================
+   TOAST NOTIFICATIONS
+========================================= */
+.toast-container {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  pointer-events: none;
+}
+
+.toast {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background-color: var(--surface-light);
+  color: var(--text-primary);
+  padding: 16px 20px;
+  border-radius: 12px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+  border: 1px solid var(--border-color);
+  min-width: 300px;
+  max-width: 400px;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  pointer-events: auto;
+  animation: slideInRight 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+}
+
+[data-theme="light"] .toast {
+  background-color: var(--bg-primary);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+}
+
+.toast-icon {
+  font-size: 1.5rem;
+  line-height: 1;
+}
+
+.toast-message {
+  font-size: 0.95rem;
+  font-weight: 500;
+  line-height: 1.4;
+  flex-grow: 1;
+}
+
+.toast-info {
+  border-left: 4px solid var(--primary-light);
+}
+
+.toast-warning {
+  border-left: 4px solid #f59e0b;
+}
+
+.toast-error {
+  border-left: 4px solid var(--danger);
+}
+
+.toast-success {
+  border-left: 4px solid var(--success);
+}
+
+@keyframes slideInRight {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes fadeOut {
+  from {
+    transform: translateX(0);
+    opacity: 1;
+  }
+  to {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+}
+
+@media (max-width: 768px) {
+  .toast-container {
+    top: auto;
+    bottom: 20px;
+    left: 20px;
+    right: 20px;
+  }
+  
+  .toast {
+    min-width: unset;
+    width: 100%;
+    animation: slideUp 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+  }
+
+  @keyframes slideUp {
+    from {
+      transform: translateY(100%);
+      opacity: 0;
+    }
+    to {
+      transform: translateY(0);
+      opacity: 1;
+    }
+  }
+
+  @keyframes fadeOut {
+    from {
+      transform: translateY(0);
+      opacity: 1;
+    }
+    to {
+      transform: translateY(100%);
+      opacity: 0;
+    }
+  }
+}
+

@@ -89,8 +89,40 @@ class QuestionGenerator {
    * =============================== */
   async generateBatch(count, topics) {
     const prompt = this.buildPrompt(count, topics);
-    const raw = await this.callOpenAI(prompt);
-    return this.parseResponse(raw);
+
+    let attempts = 0;
+    const maxAttempts = this.apis.length;
+
+    while (attempts < maxAttempts) {
+      try {
+        const raw = await this.callOpenAI(prompt);
+        return this.parseResponse(raw);
+      } catch (err) {
+        const failedApi = this.apis[this.currentApiIndex]?.name || `API #${this.currentApiIndex}`;
+        console.warn(`⚠️ Intento fallido con ${failedApi}: ${err.message}`);
+        
+        // Cambiar a la siguiente API
+        this.currentApiIndex = (this.currentApiIndex + 1) % this.apis.length;
+        localStorage.setItem('ai-current-api-index', this.currentApiIndex);
+        
+        attempts++;
+        if (attempts < maxAttempts) {
+          const nextApi = this.apis[this.currentApiIndex]?.name;
+          console.log(`🔄 Reintentando con siguiente API: ${nextApi}...`);
+          
+          // Mostrar validación visual al usuario
+          if (typeof showToast === 'function') {
+            showToast(`${failedApi} falló. Reintentando con ${nextApi}...`, 'warning');
+          }
+        }
+      }
+    }
+
+    // Si llegamos aquí, todas fallaron
+    if (typeof showToast === 'function') {
+      showToast("Todas las APIs fallaron. Verifica tus tokens o conexión.", 'error');
+    }
+    throw new Error("Todas las APIs fallaron. Verifica que tengas tokens o saldo disponible en alguna de ellas.");
   }
 
   /* ===============================

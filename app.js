@@ -443,3 +443,39 @@ async function downloadLogFile(apiName) {
     console.error('Error de red al intentar guardar el log:', error);
   }
 }
+
+/*****************************************
+ * TOAST NOTIFICATIONS
+ *****************************************/
+function showToast(message, type = 'info') {
+  const container = document.getElementById('toast-container');
+  if (!container) return;
+
+  const toast = document.createElement('div');
+  toast.className = `toast toast-${type}`;
+  
+  // Iconos basados en tipo
+  let icon = 'ℹ️';
+  if (type === 'warning') icon = '⚠️';
+  if (type === 'error') icon = '❌';
+  if (type === 'success') icon = '✅';
+
+  toast.innerHTML = `
+    <span class="toast-icon">${icon}</span>
+    <span class="toast-message">${message}</span>
+  `;
+
+  // Añadir al contenedor
+  container.appendChild(toast);
+
+  // Animar entrada simulada o dejar que CSS maneje opacity
+  // (CSS manejará the animation vía clases)
+  
+  // Remover después de 5 segundos
+  setTimeout(() => {
+    toast.style.animation = 'fadeOut 0.3s ease-in forwards';
+    setTimeout(() => {
+      toast.remove();
+    }, 300);
+  }, 5000);
+}

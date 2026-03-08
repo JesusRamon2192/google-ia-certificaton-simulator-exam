@@ -72,7 +72,7 @@ function initTheme() {
 
 function applyTheme(theme, save = true) {
   const root = document.documentElement;
-  
+
   if (theme === 'system') {
     root.removeAttribute('data-theme');
     if (save) localStorage.setItem('ai-theme', 'system');
@@ -85,11 +85,11 @@ function applyTheme(theme, save = true) {
   document.querySelectorAll('.theme-option').forEach(btn => {
     if (btn.getAttribute('data-theme-value') === theme) {
       btn.classList.add('active');
-      
+
       // Update the icon in the dropdown button
       const svgClone = btn.querySelector('svg').cloneNode(true);
       svgClone.classList.add('active-icon');
-      
+
       const dropdownBtn = document.getElementById('theme-dropdown-btn');
       const oldIcon = dropdownBtn.querySelector('.active-icon');
       if (oldIcon && dropdownBtn) {
@@ -121,6 +121,31 @@ function showQuiz() {
  *****************************************/
 function initQuestionGenerator() {
   questionGenerator = new QuestionGenerator();
+  
+  const sizeInput = document.getElementById("exam-size");
+  
+  // Agregar un event listener para validar el input en tiempo real
+  sizeInput.addEventListener("input", (e) => {
+    const val = parseInt(e.target.value);
+    const container = e.target.parentElement;
+    let warningMsg = document.getElementById("input-warning-msg");
+    
+    // Si excede el límite máximo
+    if (val > 60) {
+      e.target.classList.add("input-warning");
+      if (!warningMsg) {
+        warningMsg = document.createElement("span");
+        warningMsg.id = "input-warning-msg";
+        warningMsg.className = "input-warning-text";
+        warningMsg.textContent = "El límite recomendado y máximo es de 60 preguntas.";
+        container.appendChild(warningMsg);
+      }
+    } else {
+      e.target.classList.remove("input-warning");
+      if (warningMsg) warningMsg.remove();
+    }
+  });
+
   document
     .getElementById("generate-exam")
     .addEventListener("click", handleGenerateExam);
@@ -131,8 +156,8 @@ async function handleGenerateExam() {
   const examSize = parseInt(sizeInput.value) || 10;
   const button = document.getElementById("generate-exam");
 
-  if (examSize < 1 || examSize > 80) {
-    showStatus("❌ Ingresa un número entre 1 y 80", "error");
+  if (examSize < 1 || examSize > 60) {
+    showStatus("❌ Ingresa un número entre 1 y 60", "error");
     return;
   }
 
@@ -302,7 +327,7 @@ function prevQuestion() {
 function showResult() {
   let score = 0;
   const incorrectQuestions = [];
-  
+
   questions.forEach((q, i) => {
     if (answers[i] === q.answer) {
       score++;
@@ -323,19 +348,19 @@ function showResult() {
 
   // Calculate percentage
   const percentage = ((score / questions.length) * 100).toFixed(1);
-  
+
   // Determine recommendation
   const isRecommended = percentage >= 70;
   const recommendationText = isRecommended
     ? "✅ ¡Estás listo! Se recomienda presentar el examen de certificación oficial."
     : "⚠️ Se recomienda estudiar más antes de presentar el examen oficial. Intenta obtener al menos 70% de aciertos.";
-  
+
   const recommendationClass = isRecommended ? "recommendation-pass" : "recommendation-study";
 
   document.getElementById(
     "score"
   ).textContent = `Obtuviste ${score} / ${questions.length}`;
-  
+
   // Add percentage and recommendation
   const scoreElement = document.getElementById("score");
   scoreElement.innerHTML = `
@@ -343,13 +368,13 @@ function showResult() {
     <div class="percentage-score">Calificación: ${percentage}%</div>
     <div class="recommendation ${recommendationClass}">${recommendationText}</div>
   `;
-  
+
   displayIncorrectQuestions(incorrectQuestions);
 }
 
 function displayIncorrectQuestions(incorrectQuestions) {
   const container = document.getElementById("incorrect-questions-container");
-  
+
   if (incorrectQuestions.length === 0) {
     container.innerHTML = `
       <div class="perfect-score">
@@ -359,20 +384,20 @@ function displayIncorrectQuestions(incorrectQuestions) {
     `;
     return;
   }
-  
+
   let html = `
     <div class="incorrect-questions-header">
       <h3>📝 Revisión de Respuestas Incorrectas</h3>
       <p>Revisa las ${incorrectQuestions.length} pregunta(s) que respondiste incorrectamente:</p>
     </div>
   `;
-  
+
   incorrectQuestions.forEach((item) => {
-    const userAnswerText = item.userAnswer !== null 
-      ? item.options[item.userAnswer] 
+    const userAnswerText = item.userAnswer !== null
+      ? item.options[item.userAnswer]
       : "No respondida";
     const correctAnswerText = item.options[item.correctAnswer];
-    
+
     html += `
       <div class="incorrect-question-item">
         <div class="question-number-badge">Pregunta ${item.questionNumber}</div>
@@ -397,7 +422,7 @@ function displayIncorrectQuestions(incorrectQuestions) {
       </div>
     `;
   });
-  
+
   container.innerHTML = html;
 }
 
@@ -435,7 +460,7 @@ async function downloadLogFile(apiName) {
       },
       body: JSON.stringify({ apiName })
     });
-    
+
     if (!response.ok) {
       console.warn('Advertencia: El backend no pudo guardar el log. ¿Estás en un entorno estático sin Node?');
     }
@@ -453,7 +478,7 @@ function showToast(message, type = 'info') {
 
   const toast = document.createElement('div');
   toast.className = `toast toast-${type}`;
-  
+
   // Iconos basados en tipo
   let icon = 'ℹ️';
   if (type === 'warning') icon = '⚠️';
@@ -470,7 +495,7 @@ function showToast(message, type = 'info') {
 
   // Animar entrada simulada o dejar que CSS maneje opacity
   // (CSS manejará the animation vía clases)
-  
+
   // Remover después de 5 segundos
   setTimeout(() => {
     toast.style.animation = 'fadeOut 0.3s ease-in forwards';

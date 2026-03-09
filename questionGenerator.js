@@ -72,7 +72,7 @@ class QuestionGenerator {
 
     // Identificamos las preguntas agregando qué API se utilizó para esta corrida de batch
     allQuestions.forEach(q => {
-      if(!q.apiUsed) {
+      if (!q.apiUsed) {
         q.apiUsed = this.apis[this.currentApiIndex].name;
       }
     });
@@ -100,16 +100,16 @@ class QuestionGenerator {
       } catch (err) {
         const failedApi = this.apis[this.currentApiIndex]?.name || `API #${this.currentApiIndex}`;
         console.warn(`⚠️ Intento fallido con ${failedApi}: ${err.message}`);
-        
+
         // Cambiar a la siguiente API
         this.currentApiIndex = (this.currentApiIndex + 1) % this.apis.length;
         localStorage.setItem('ai-current-api-index', this.currentApiIndex);
-        
+
         attempts++;
         if (attempts < maxAttempts) {
           const nextApi = this.apis[this.currentApiIndex]?.name;
           console.log(`🔄 Reintentando con siguiente API: ${nextApi}...`);
-          
+
           // Mostrar validación visual al usuario
           if (typeof showToast === 'function') {
             showToast(`${failedApi} falló. Reintentando con ${nextApi}...`, 'warning');
@@ -130,36 +130,39 @@ class QuestionGenerator {
    * =============================== */
   buildPrompt(count, topics) {
     return `
-Genera ${count} preguntas DIFERENTES para el examen Google Cloud Generative AI Certification.
+Actúa como un ingeniero experto en Google Cloud. Genera ${count} preguntas DIFERENTES de nivel de certificación para el examen "Google Cloud Generative AI".
 
 REGLAS OBLIGATORIAS:
 - Cada pregunta debe usar UN tema distinto de esta lista:
 ${topics.map(t => `- ${t}`).join("\n")}
 
-- No repitas preguntas ni escenarios
-- Español
-- 4 opciones
-- 1 correcta
-- Responde SOLO con JSON válido
-- Sin markdown
-- Sin texto adicional
+- No repitas preguntas ni escenarios de preguntas anteriores.
+- Idioma: Español.
+- TERMINOLOGÍA: Utiliza SIEMPRE los acrónimos estándar de la industria, incluso si el texto está en español. Por ejemplo, usa "ML" o "Machine Learning", "AA" o "Aprendizaje Automático" pero no confundas la temrinología con otros idiomas. Usa "IA" o "AI", "LLM", etc.
+- Debe tener exactamente 4 opciones de respuesta.
+- Solo 1 opción debe ser la correcta. Las otras 3 deben ser plausibles pero indudablemente incorrectas.
+- EVITA opciones ambiguas, obvias o como "Todas las anteriores" / "Ninguna de las anteriores".
+- La explicación DEBE justificar claramente por qué la respuesta correcta es correcta y por qué las demás fallan.
+- El índice de la respuesta correcta ("answer") DEBE coincidir sin ninguna duda con la opción correcta descrita en la explicación.
+- Responde SOLO con JSON válido. Ni una sola palabra fuera del JSON. Sin bloques de código markdown (\`\`\`json).
 
-FORMATO EXACTO:
+FORMATO EXACTO DEL JSON:
 {
   "questions": [
     {
-      "question": "Texto de la pregunta",
+      "question": "Texto detallado de la pregunta",
       "options": [
-        "A) Texto completo de la opción A",
-        "B) Texto completo de la opción B",
-        "C) Texto completo de la opción C",
-        "D) Texto completo de la opción D"
+        "A) Texto de la opción A",
+        "B) Texto de la opción B",
+        "C) Texto de la opción C",
+        "D) Texto de la opción D"
       ],
-      "answer": 0,
-      "explicacion": "Explicación clara y detallada"
+      "explicacion": "Primero, explica detalladamente el razonamiento para llegar a la respuesta correcta y descartar las demás.",
+      "answer": 0
     }
   ]
 }
+NOTA SOBRE "answer": Debe ser numérico, correspondiendo al índice de la opción correcta (0 para la opción A, 1 para la B, 2 para la C, 3 para la D).
 `;
   }
 

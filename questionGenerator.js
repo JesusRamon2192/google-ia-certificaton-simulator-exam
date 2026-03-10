@@ -10,11 +10,12 @@ class QuestionGenerator {
       this.currentApiIndex = 0;
     }
     this.topics = [];
-    this.BATCH_SIZE = 5;
+    this.studyGuide = "";
+    this.BATCH_SIZE = 2; // Reducido para evitar alucinaciones por sobrecarga de contexto
   }
 
   /* ===============================
-   * CARGA DE TEMAS
+   * CARGA DE TEMAS Y GUÍA DE ESTUDIO
    * =============================== */
   async loadTopics() {
     if (this.topics.length > 0) return this.topics;
@@ -32,11 +33,27 @@ class QuestionGenerator {
     }
   }
 
+  async loadStudyGuide() {
+    if (this.studyGuide) return this.studyGuide;
+
+    try {
+      const response = await fetch("study-guide.txt");
+      if (!response.ok) throw new Error("No se pudo cargar study-guide.txt");
+      this.studyGuide = await response.text();
+      return this.studyGuide;
+    } catch (err) {
+      console.error("❌ Error cargando la guía de estudio:", err);
+      this.studyGuide = "";
+      return this.studyGuide;
+    }
+  }
+
   /* ===============================
    * API PÚBLICA
    * =============================== */
   async generateMultipleQuestions(total) {
     await this.loadTopics();
+    await this.loadStudyGuide();
     const allQuestions = [];
     const usedHashes = new Set();
     let topicIndex = 0;
@@ -88,7 +105,7 @@ class QuestionGenerator {
    * GENERACIÓN DE LOTE
    * =============================== */
   async generateBatch(count, topics) {
-    const prompt = this.buildPrompt(count, topics);
+    const prompt = this.buildPrompt(count, topics, this.studyGuide);
 
     let attempts = 0;
     const maxAttempts = this.apis.length;
@@ -128,21 +145,31 @@ class QuestionGenerator {
   /* ===============================
    * PROMPT
    * =============================== */
-  buildPrompt(count, topics) {
+  buildPrompt(count, topics, studyGuide) {
     return `
-Actúa como un ingeniero experto en Google Cloud. Genera ${count} preguntas DIFERENTES de nivel de certificación para el examen "Google Cloud Generative AI".
+Actúa como un examinador riguroso de certificación de Google Cloud. Genera ${count} preguntas DIFERENTES de nivel de certificación para el examen "Google Cloud Generative AI".
+
+RESTRICCIÓN CRÍTICA:
+- TU ÚNICA FUENTE DE INFORMACIÓN ES EL SIGUIENTE DOCUMENTO. PROHIBIDO usar conocimientos externos o inventar servicios que no aparezcan verbatim en él. Si un tema no está en el documento, elige otro tema que sí lo esté.
+
+<study_guide>
+${studyGuide}
+</study_guide>
 
 REGLAS OBLIGATORIAS:
-- Cada pregunta debe usar UN tema distinto de esta lista:
+- Cada pregunta debe usar UN tema distinto de esta lista (evalúa si están en la guía):
 ${topics.map(t => `- ${t}`).join("\n")}
 
 - No repitas preguntas ni escenarios de preguntas anteriores.
 - Idioma: Español.
-- TERMINOLOGÍA: Utiliza SIEMPRE los acrónimos estándar de la industria, incluso si el texto está en español. Por ejemplo, usa "ML" o "Machine Learning", "AA" o "Aprendizaje Automático" pero no confundas la temrinología con otros idiomas. Usa "IA" o "AI", "LLM", etc.
+- TERMINOLOGÍA: Utiliza SIEMPRE los acrónimos estándar de la industria, incluso si el texto está en español.
 - Debe tener exactamente 4 opciones de respuesta.
-- Solo 1 opción debe ser la correcta. Las otras 3 deben ser plausibles pero indudablemente incorrectas.
+- Solo 1 opción debe ser la correcta. Las otras 3 deben ser plausibles pero indudablemente incorrectas. Los distractores deben ser términos que SÍ existan en la guía de estudio, pero correspondientes a conceptos diferentes.
 - EVITA opciones ambiguas, obvias o como "Todas las anteriores" / "Ninguna de las anteriores".
-- La explicación DEBE justificar claramente por qué la respuesta correcta es correcta y por qué las demás fallan.
+- La posición de la respuesta correcta (A, B, C o D) debe ser elegida de forma ALEATORIA por ti para cada pregunta. No pongas siempre la respuesta correcta en la misma opción.
+- Para evitar errores lógicos, tu salida debe incluir tu ruta de razonamiento ("razonamiento_interno") y extraer la cita exacta de la guía de estudio ("cita_textual") en la que te basas, ANTES de generar la pregunta.
+- La explicación DEBE empezar explícitamente indicando la letra de la opción correcta (ej: "La respuesta correcta es la C) porque..."). Esta letra y justificación deben coincidir exactamente con la opción correcta generada.
+- La explicación DEBE justificar claramente por qué la respuesta correcta es correcta y por qué las demás fallan, basándose en la cita.
 - El índice de la respuesta correcta ("answer") DEBE coincidir sin ninguna duda con la opción correcta descrita en la explicación.
 - Responde SOLO con JSON válido. Ni una sola palabra fuera del JSON. Sin bloques de código markdown (\`\`\`json).
 
@@ -150,6 +177,8 @@ FORMATO EXACTO DEL JSON:
 {
   "questions": [
     {
+      "razonamiento_interno": "Análisis paso a paso para formular la pregunta y distractores basados en el texto...",
+      "cita_textual": "Fragmento exacto copiado y pegado de la guía de estudio que respalda la respuesta...",
       "question": "Texto detallado de la pregunta",
       "options": [
         "A) Texto de la opción A",
@@ -157,7 +186,7 @@ FORMATO EXACTO DEL JSON:
         "C) Texto de la opción C",
         "D) Texto de la opción D"
       ],
-      "explicacion": "Primero, explica detalladamente el razonamiento para llegar a la respuesta correcta y descartar las demás.",
+      "explicacion": "Primero, explica detalladamente el razonamiento para llegar a la respuesta correcta y descartar las demás, referenciando la cita textual.",
       "answer": 0
     }
   ]
@@ -227,44 +256,20 @@ NOTA SOBRE "answer": Debe ser numérico, correspondiendo al índice de la opció
       throw new Error("Preguntas inválidas");
     }
 
-    // Mezclar las opciones de cada pregunta para evitar sesgo
-    valid.forEach(q => this.shuffleOptions(q));
+    // Se eliminó la mezcla local de opciones (shuffleOptions) para que la letra de la opción 
+    // coincida perfectamente con la explicación generada por la IA.
+    // La responsabilidad de la aleatorización ahora recae en el prompt de la IA.
 
     return valid;
-  }
-
-  /* ===============================
-   * MEZCLAR OPCIONES
-   * =============================== */
-  shuffleOptions(question) {
-    // Extraer solo el texto de las opciones (sin A), B), C), D))
-    const optionTexts = question.options.map(opt => {
-      const match = opt.match(/^[A-D]\)\s*(.+)$/);
-      return match ? match[1] : opt;
-    });
-
-    // Guardar el texto de la respuesta correcta
-    const correctAnswerText = optionTexts[question.answer];
-
-    // Fisher-Yates shuffle algorithm para mezclar solo los textos
-    for (let i = optionTexts.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [optionTexts[i], optionTexts[j]] = [optionTexts[j], optionTexts[i]];
-    }
-
-    // Reasignar las opciones con el patrón A), B), C), D) preservado
-    const prefixes = ['A)', 'B)', 'C)', 'D)'];
-    question.options = optionTexts.map((text, index) => `${prefixes[index]} ${text}`);
-
-    // Actualizar el índice de la respuesta correcta
-    question.answer = optionTexts.indexOf(correctAnswerText);
   }
 
   /* ===============================
    * VALIDACIÓN + HASH
    * =============================== */
   validate(q) {
-    return (
+    const isValidStructure = (
+      typeof q.razonamiento_interno === "string" &&
+      typeof q.cita_textual === "string" &&
       typeof q.question === "string" &&
       Array.isArray(q.options) &&
       q.options.length === 4 &&
@@ -273,6 +278,30 @@ NOTA SOBRE "answer": Debe ser numérico, correspondiendo al índice de la opció
       q.answer <= 3 &&
       typeof q.explicacion === "string"
     );
+
+    if (!isValidStructure) return false;
+
+    // Validación estricta de la cita textual contra la guía de estudio
+    if (this.studyGuide && q.cita_textual) {
+       const normalizedGuide = this.normalizeStrict(this.studyGuide);
+       const normalizedQuote = this.normalizeStrict(q.cita_textual);
+       
+       if (normalizedQuote.length > 5 && !normalizedGuide.includes(normalizedQuote)) {
+          console.warn(`⚠️ Pregunta descartada por alucinación de cita: "${q.cita_textual}"`);
+          return false;
+       }
+    }
+
+    return true;
+  }
+
+  normalizeStrict(text) {
+    if (!text) return "";
+    return text
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "") // Limpiar acentos
+      .toLowerCase()
+      .replace(/[^a-z0-9]/g, ""); // Mantener sólo alfanuméricos
   }
 
   normalize(text) {

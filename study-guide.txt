@@ -1,0 +1,161 @@
+GENERATIVE AI LEADER – GUÍA DE ESTUDIO
+
+La certificación evalúa conocimientos en cuatro áreas principales:
+
+1. Fundamentos de la IA generativa (~30%)
+2. Ofertas de IA generativa de Google Cloud (~35%)
+3. Técnicas para mejorar la salida de modelos generativos (~20%)
+4. Estrategias de negocio para soluciones de IA generativa (~15%)
+
+---
+
+FUNDAMENTOS DE LA IA GENERATIVA
+
+Inteligencia Artificial (AI)
+Disciplina que busca construir sistemas capaces de realizar tareas que normalmente requieren inteligencia humana, como aprendizaje, razonamiento o toma de decisiones.
+
+Machine Learning (ML)
+Subcampo de la inteligencia artificial en el cual los sistemas aprenden patrones a partir de datos para realizar predicciones o tomar decisiones.
+
+Generative AI
+Aplicación de machine learning enfocada en crear contenido nuevo como texto, imágenes, audio o código.
+
+Deep Learning
+Subcampo de ML que utiliza redes neuronales profundas para identificar patrones complejos en grandes cantidades de datos.
+
+Foundation Models
+Modelos de gran escala entrenados con enormes cantidades de datos no etiquetados. Estos modelos pueden adaptarse a muchas tareas diferentes.
+
+Large Language Models (LLMs)
+Tipo de foundation model especializado en comprender y generar lenguaje humano.
+
+CAPACIDADES DE LA IA GENERATIVA
+
+La IA generativa puede:
+
+* Crear contenido nuevo
+* Resumir información
+* Descubrir información relevante
+* Automatizar tareas que antes eran manuales
+
+TIPOS DE DATOS
+
+Datos estructurados
+Datos organizados en formatos claros, normalmente en bases de datos.
+
+Datos no estructurados
+Datos sin estructura fija, como texto libre, audio o imágenes.
+
+Datos de calidad
+Datos completos, consistentes, correctos y relevantes.
+
+Datos accesibles
+Datos disponibles y en formato adecuado para ser usados en entrenamiento.
+
+TIPOS DE APRENDIZAJE EN MACHINE LEARNING
+
+Supervised Learning
+Entrena modelos con datos etiquetados para predecir resultados.
+
+Unsupervised Learning
+Encuentra patrones o agrupaciones en datos no etiquetados.
+
+Reinforcement Learning
+El modelo aprende mediante interacción con el entorno y recompensas o penalizaciones.
+
+---
+
+PAISAJE DE LA IA GENERATIVA
+
+Los sistemas de IA generativa suelen tener varias capas:
+
+Aplicación
+La interfaz con la que interactúa el usuario.
+
+Agente
+Software que observa el entorno, toma decisiones y ejecuta acciones para cumplir un objetivo.
+
+Plataforma
+Proporciona APIs, gestión de datos y herramientas para desplegar modelos.
+
+Modelo
+Algoritmos entrenados con grandes conjuntos de datos para generar contenido o realizar predicciones.
+
+Infraestructura
+Recursos computacionales necesarios como servidores, GPUs o TPUs.
+
+MODELOS DE IA DE GOOGLE
+
+Gemini
+Modelo multimodal capaz de comprender y generar texto, imágenes, código y otros tipos de contenido.
+
+Gemma
+Familia de modelos ligeros diseñados para desarrolladores y para ejecutarse en entornos locales.
+
+Imagen
+Modelo de difusión que genera imágenes a partir de descripciones en texto.
+
+Veo
+Modelo capaz de generar video a partir de texto o imágenes.
+
+---
+
+OFERTAS DE IA GENERATIVA EN GOOGLE CLOUD
+
+Google adopta una estrategia "AI-first", integrando IA en todo su ecosistema.
+
+Vertex AI
+Plataforma unificada de Google Cloud para construir, entrenar y desplegar modelos de machine learning y generative AI.
+
+Capacidades de Vertex AI:
+
+* Model Garden: catálogo de modelos preentrenados
+* Model Builder: creación de modelos personalizados
+* MLOps: herramientas para gestionar el ciclo de vida de los modelos
+* Infraestructura para entrenamiento y despliegue
+
+Gemini API
+Permite integrar capacidades de IA generativa dentro de aplicaciones.
+
+Google AI Studio
+Entorno para prototipado rápido de aplicaciones con IA generativa.
+
+Vertex AI Studio
+Entorno para crear aplicaciones de IA listas para producción.
+
+NotebookLM
+Asistente de investigación basado en IA que analiza documentos cargados y genera resúmenes, respuestas e ideas basadas en las fuentes proporcionadas.
+
+---
+
+APIs DE GOOGLE CLOUD RELACIONADAS CON IA
+
+Speech-to-Text API
+Convierte audio en texto.
+
+Text-to-Speech API
+Convierte texto en audio con voz natural.
+
+Translation API
+Traduce texto, documentos, audio o video entre diferentes idiomas.
+
+Document AI
+Extrae datos estructurados a partir de documentos.
+
+Cloud Vision API
+Analiza imágenes para detectar objetos, texto o rostros.
+
+Cloud Video Intelligence API
+Analiza contenido de video y extrae información relevante.
+
+Natural Language API
+Analiza texto para detectar sentimiento, clasificar contenido y extraer entidades.
+
+---
+
+TÉCNICAS PARA MEJORAR LAS RESPUESTAS DE MODELOS
+
+PROMPT ENGINEERING
+
+Zero-shot prompting
+Solicitar una tarea sin p

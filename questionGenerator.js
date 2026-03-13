@@ -14,6 +14,10 @@ class QuestionGenerator {
     this.BATCH_SIZE = 2; // Reducido para evitar alucinaciones por sobrecarga de contexto
   }
 
+  sleep(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+  }
+
   /* ===============================
    * CARGA DE TEMAS Y GUÍA DE ESTUDIO
    * =============================== */
@@ -68,6 +72,12 @@ class QuestionGenerator {
         topicIndex++;
       }
 
+      // Pausa activa entre lotes para no saturar los límites de peticiones por minuto de las APIs
+      if (allQuestions.length > 0) {
+        console.log(`⏳ Esperando 2.5s antes del siguiente lote...`);
+        await this.sleep(2500);
+      }
+
       const batch = await this.generateBatch(batchSize, topicsForBatch);
       const unique = [];
 
@@ -109,35 +119,51 @@ class QuestionGenerator {
 
     let attempts = 0;
     const maxAttempts = this.apis.length;
+    let globalRetries = 0;
+    const maxGlobalRetries = 1; // Un reintento global con backoff para evitar 429 Too Many Requests
 
-    while (attempts < maxAttempts) {
-      try {
-        const raw = await this.callOpenAI(prompt);
-        return this.parseResponse(raw);
-      } catch (err) {
-        const failedApi = this.apis[this.currentApiIndex]?.name || `API #${this.currentApiIndex}`;
-        console.warn(`⚠️ Intento fallido con ${failedApi}: ${err.message}`);
+    while (globalRetries <= maxGlobalRetries) {
+      attempts = 0;
+      while (attempts < maxAttempts) {
+        try {
+          const raw = await this.callOpenAI(prompt);
+          return this.parseResponse(raw);
+        } catch (err) {
+          const failedApi = this.apis[this.currentApiIndex]?.name || `API #${this.currentApiIndex}`;
+          console.warn(`⚠️ Intento fallido con ${failedApi}: ${err.message}`);
 
-        // Cambiar a la siguiente API
-        this.currentApiIndex = (this.currentApiIndex + 1) % this.apis.length;
-        localStorage.setItem('ai-current-api-index', this.currentApiIndex);
+          // Cambiar a la siguiente API
+          this.currentApiIndex = (this.currentApiIndex + 1) % this.apis.length;
+          localStorage.setItem('ai-current-api-index', this.currentApiIndex);
 
-        attempts++;
-        if (attempts < maxAttempts) {
-          const nextApi = this.apis[this.currentApiIndex]?.name;
-          console.log(`🔄 Reintentando con siguiente API: ${nextApi}...`);
+          attempts++;
+          if (attempts < maxAttempts) {
+            const nextApi = this.apis[this.currentApiIndex]?.name;
+            console.log(`🔄 Reintentando con siguiente API: ${nextApi}...`);
 
-          // Mostrar validación visual al usuario
-          if (typeof showToast === 'function') {
-            showToast(`${failedApi} falló. Reintentando con ${nextApi}...`, 'warning');
+            // Mostrar validación visual al usuario
+            if (typeof showToast === 'function') {
+              showToast(`${failedApi} falló. Reintentando con ${nextApi}...`, 'warning');
+            }
           }
         }
       }
+
+      if (globalRetries < maxGlobalRetries) {
+        console.warn(`⏳ Todas las APIs fallaron en este intento. Aplicando backoff de 10 segundos antes del reintento final...`);
+        if (typeof showToast === 'function') {
+          showToast(`Límites de API saturados. Pausando 10s para recuperar tokens...`, 'warning');
+        }
+        await this.sleep(10000);
+        globalRetries++;
+      } else {
+        break;
+      }
     }
 
-    // Si llegamos aquí, todas fallaron
+    // Si llegamos aquí después de los reintentos globales, falló definitivamente
     if (typeof showToast === 'function') {
-      showToast("Todas las APIs fallaron. Verifica tus tokens o conexión.", 'error');
+      showToast("Todas las APIs fallaron tras los reintentos. Verifica tus tokens o conexión.", 'error');
     }
     throw new Error("Todas las APIs fallaron. Verifica que tengas tokens o saldo disponible en alguna de ellas.");
   }

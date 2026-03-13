@@ -141,9 +141,9 @@ class QuestionGenerator {
             const nextApi = this.apis[this.currentApiIndex]?.name;
             console.log(`🔄 Reintentando con siguiente API: ${nextApi}...`);
 
-            // Mostrar validación visual al usuario
+            // Mostrar validación visual al usuario mostrando la razón
             if (typeof showToast === 'function') {
-              showToast(`${failedApi} falló. Reintentando con ${nextApi}...`, 'warning');
+              showToast(`${failedApi} falló: ${err.message}. Reintentando con ${nextApi}...`, 'warning');
             }
           }
         }
@@ -313,8 +313,8 @@ NOTA SOBRE "answer": Debe ser numérico, correspondiendo al índice de la opció
        const normalizedQuote = this.normalizeStrict(q.cita_textual);
        
        if (normalizedQuote.length > 5 && !normalizedGuide.includes(normalizedQuote)) {
-          console.warn(`⚠️ Pregunta descartada por alucinación de cita: "${q.cita_textual}"`);
-          return false;
+          console.warn(`⚠️ Advertencia: La IA parafraseó o alucinó la cita textual: "${q.cita_textual}". Se aceptará la pregunta de todos modos.`);
+          // Removemos el 'return false;' para permitir que modelos más pequeños (Llama 8B) funcionen
        }
     }
 

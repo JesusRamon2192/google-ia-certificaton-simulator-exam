@@ -75,3 +75,6 @@ coverage/
 # OS
 .DS_Store
 Thumbs.db
+
+test-chat.js
+test-keys.js

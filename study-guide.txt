@@ -158,4 +158,13 @@ TÉCNICAS PARA MEJORAR LAS RESPUESTAS DE MODELOS
 PROMPT ENGINEERING
 
 Zero-shot prompting
-Solicitar una tarea sin p
+Solicitar una tarea sin proporcionar ejemplos previos.
+
+Few-shot prompting
+Incluir algunos ejemplos en el prompt para guiar al modelo.
+
+Chain-of-Thought (CoT) prompting
+Pedir al modelo que explique su razonamiento paso a paso.
+
+Retrieval-Augmented Generation (RAG)
+Técnica que combina modelos generativos con sistemas de recuperación de información para mejorar la precisión y relevancia de las respuestas.

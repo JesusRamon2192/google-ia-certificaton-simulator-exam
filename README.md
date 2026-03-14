@@ -2,6 +2,8 @@
 
 Simulador de examen interactivo para la **Google Cloud Generative AI Certification**. Utiliza Inteligencia Artificial con soporte multi-API (OpenAI, Groq, Cerebras) para generar preguntas dinámicas, únicas y personalizadas basadas en temas clave y oficiales de la certificación.
 
+![Página Principal](screenshots/pagina-principal.png)
+
 ## 🌟 Características Principales
 
 - **Generación con IA Multi-Modelo**: Alterna automáticamente (Round Robin) entre múltiples proveedores de IA (OpenAI, Groq, Cerebras) para repartir la carga y maximizar la disponibilidad al generar preguntas.
@@ -60,8 +62,13 @@ Simulador de examen interactivo para la **Google Cloud Generative AI Certificati
 2. Ingresa la cantidad de preguntas que deseas generar (desde 1 hasta 80 preguntas contiguas en tandas).
 3. Haz clic en **Generar Examen**. El sistema preparará tu cuestionario conectándose al modelo de lenguaje en turno.
 4. Comienza a responder las preguntas. Si lo deseas, consulta el porqué de la respuesta correcta seleccionando "Ver explicación".
+
+![Preguntas del Examen](screenshots/preguntas.png)
+
 5. Al terminar, se procesará tu calificación y verás rápidamente si estás apto o si requieres mayor estudio (recomendación = >= 70%).
 6. Revisa detenidamente el Panel flotante de Respuestas Incorrectas para ver en qué fallaste y mejorar tus áreas de oportunidad.
+
+![Resultado Final](screenshots/resultado-final.png)
 
 ## 🎨 Selector de Temas
 
